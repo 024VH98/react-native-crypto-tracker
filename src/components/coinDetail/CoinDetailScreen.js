@@ -1,15 +1,26 @@
 import React, {Component} from 'react';
-import {View, Text, Image, SectionList, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  SectionList,
+  FlatList,
+  StyleSheet,
+} from 'react-native';
+import Http from '../../libs/http';
 import Colors from '../../res/colors';
+import CoinMarketItem from './CoinMarketItem';
 
 class CoinDetailScreen extends Component {
   state = {
     coin: {},
+    markets: [],
   };
   componentDidMount() {
     const {coin} = this.props.route.params;
     // With this we set the title for the navigation
     this.props.navigation.setOptions({title: coin.symbol});
+    this.getMarkets(coin.id);
     this.setState({coin});
   }
 
@@ -42,8 +53,15 @@ class CoinDetailScreen extends Component {
     return sections;
   };
 
+  // This function is to get the markets
+  getMarkets = async (coinId) => {
+    const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
+    const markets = await Http.instance.get(url);
+    this.setState({markets});
+  };
+
   render() {
-    const {coin} = this.state;
+    const {coin, markets} = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.subheader}>
@@ -55,6 +73,7 @@ class CoinDetailScreen extends Component {
         </View>
         {/* this list is good to have section with title and subitems */}
         <SectionList
+          style={styles.section}
           sections={this.getSections(coin)}
           keyExtractor={(item) => item}
           renderItem={({item}) => (
@@ -68,6 +87,13 @@ class CoinDetailScreen extends Component {
             </View>
           )}
         />
+        <Text style={styles.marketTitle}>Markets</Text>
+        <FlatList
+          style={styles.list}
+          horizontal={true}
+          data={markets}
+          renderItem={({item}) => <CoinMarketItem item={item} />}
+        />
       </View>
     );
   }
@@ -77,6 +103,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.charade,
+  },
+  list: {
+    maxHeight: 100,
+    paddingLeft: 16,
+  },
+  marketTitle: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 16,
+    marginLeft: 16,
+    fontWeight: 'bold',
   },
   subheader: {
     backgroundColor: 'rgba(0,0,0,0.1)',
@@ -88,6 +125,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginLeft: 8,
+  },
+  section: {
+    maxHeight: 220,
   },
   iconImage: {
     width: 25,
