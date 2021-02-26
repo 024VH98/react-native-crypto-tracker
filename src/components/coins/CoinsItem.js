@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet, Platform} from 'react-native';
+import {View, Text, Pressable, Image, StyleSheet, Platform} from 'react-native';
 import ArrowUp from '../../assets/arrow_up.png';
 import ArrowDown from '../../assets/arrow_down.png';
 import Colors from '../../res/colors';
@@ -13,9 +13,9 @@ const CoinsItem = (props) => {
     }
   };
 
-  const {item} = props;
+  const {item, onPress} = props;
   return (
-    <View style={styles.container}>
+    <Pressable onPress={onPress} style={styles.container}>
       <View style={styles.row}>
         <Text style={styles.symbolText}>{item.symbol}</Text>
         <Text style={styles.nameText}>{item.name}</Text>
@@ -25,7 +25,7 @@ const CoinsItem = (props) => {
         <Text style={styles.percentText}>{item.percent_change_1h}</Text>
         <Image style={styles.imgIcon} source={getImageArrow()} />
       </View>
-    </View>
+    </Pressable>
   );
 };
 
