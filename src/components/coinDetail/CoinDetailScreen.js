@@ -6,8 +6,10 @@ import {
   SectionList,
   FlatList,
   StyleSheet,
+  Pressable,
 } from 'react-native';
 import Http from '../../libs/http';
+import Storage from '../../libs/storage';
 import Colors from '../../res/colors';
 import CoinMarketItem from './CoinMarketItem';
 
@@ -15,6 +17,7 @@ class CoinDetailScreen extends Component {
   state = {
     coin: {},
     markets: [],
+    isFavorite: false,
   };
   componentDidMount() {
     const {coin} = this.props.route.params;
@@ -60,16 +63,48 @@ class CoinDetailScreen extends Component {
     this.setState({markets});
   };
 
+  toggleFavorite = async () => {
+    if (this.state.isFavorite) {
+      this.removeFavorite();
+    } else {
+      this.addFavorite();
+    }
+  };
+
+  addFavorite = () => {
+    const coin = JSON.stringify(this.state.coin);
+    const key = `favorite-${this.state.coin.id}`;
+
+    const stored = Storage.instance.store(key, coin);
+    if (stored) {
+      this.setState({isFavorite: true});
+    }
+  };
+
+  removeFavorite = () => {};
+
   render() {
-    const {coin, markets} = this.state;
+    const {coin, markets, isFavorite} = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.subheader}>
-          <Image
-            style={styles.iconImage}
-            source={{uri: this.getSymbolIcon(coin.name)}}
-          />
-          <Text style={styles.titleText}>{coin.name}</Text>
+          <View style={styles.row}>
+            <Image
+              style={styles.iconImage}
+              source={{uri: this.getSymbolIcon(coin.name)}}
+            />
+            <Text style={styles.titleText}>{coin.name}</Text>
+          </View>
+          <Pressable
+            onPress={this.toggleFavorite}
+            style={[
+              styles.btnFavorite,
+              isFavorite ? styles.btnFavoriteRemove : styles.btnFavoriteAdd,
+            ]}>
+            <Text style={styles.btnFavoriteText}>
+              {isFavorite ? 'Remove favorite' : 'Add Favorite'}
+            </Text>
+          </Pressable>
         </View>
         {/* this list is good to have section with title and subitems */}
         <SectionList
@@ -104,6 +139,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.charade,
   },
+  row: {
+    flexDirection: 'row',
+  },
   list: {
     maxHeight: 100,
     paddingLeft: 16,
@@ -119,6 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
     padding: 16,
     flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   titleText: {
     fontSize: 16,
@@ -148,6 +187,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  btnFavorite: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  btnFavoriteAdd: {
+    backgroundColor: Colors.picton,
+  },
+  btnFavoriteRemove: {
+    backgroundColor: Colors.carmine,
+  },
+  btnFavoriteText: {
+    color: Colors.white,
   },
 });
 
